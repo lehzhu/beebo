@@ -43,46 +43,53 @@ player2_pos = [4, 4]  # Starting position
 while True:
     screen.fill(WHITE)
 
+    # Draw grid lines
+    for i in range(GRID_SIZE + 1):
+        pygame.draw.line(screen, BLACK, (i * CELL_SIZE, 0), (i * CELL_SIZE, HEIGHT))  # Vertical lines
+        pygame.draw.line(screen, BLACK, (0, i * CELL_SIZE), (WIDTH, i * CELL_SIZE))  # Horizontal lines
+
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             pygame.quit()
             sys.exit()
         elif event.type == pygame.KEYDOWN:
-            x1, y1 = player1_pos
-            if event.key == pygame.K_w and y1 > 0:
-                y1 -= 1
-                player1_angle = 270
-            elif event.key == pygame.K_s and y1 < GRID_SIZE - 1:
-                y1 += 1
-                player1_angle = 90
-            elif event.key == pygame.K_a and x1 > 0:
-                x1 -= 1
-                player1_angle = 180
-            elif event.key == pygame.K_d and x1 < GRID_SIZE - 1:
-                x1 += 1
-                player1_angle = 0
-            player1_pos = x1, y1
-            grid[y1][x1] = RED
-            if RED_MOVES > 0:
-                RED_MOVES -= 1
+            # Player 1 Movement
+            if event.key in [pygame.K_w, pygame.K_s, pygame.K_a, pygame.K_d] and RED_MOVES > 0:
+                x1, y1 = player1_pos
+                if event.key == pygame.K_w and y1 > 0:
+                    y1 -= 1
+                    player1_angle = 270
+                elif event.key == pygame.K_s and y1 < GRID_SIZE - 1:
+                    y1 += 1
+                    player1_angle = 90
+                elif event.key == pygame.K_a and x1 > 0:
+                    x1 -= 1
+                    player1_angle = 180
+                elif event.key == pygame.K_d and x1 < GRID_SIZE - 1:
+                    x1 += 1
+                    player1_angle = 0
+                player1_pos = x1, y1
+                grid[y1][x1] = RED
+                RED_MOVES -= 1  # Decrement player 1 move counter
 
-            x2, y2 = player2_pos
-            if event.key == pygame.K_UP and y2 > 0:
-                y2 -= 1
-                player2_angle = 270
-            elif event.key == pygame.K_DOWN and y2 < GRID_SIZE - 1:
-                y2 += 1
-                player2_angle = 90
-            elif event.key == pygame.K_LEFT and x2 > 0:
-                x2 -= 1
-                player2_angle = 180
-            elif event.key == pygame.K_RIGHT and x2 < GRID_SIZE - 1:
-                x2 += 1
-                player2_angle = 0
-            player2_pos = x2, y2
-            grid[y2][x2] = BLUE
-            if BLUE_MOVES > 0:
-                BLUE_MOVES -= 1
+            # Player 2 Movement
+            if event.key in [pygame.K_UP, pygame.K_DOWN, pygame.K_LEFT, pygame.K_RIGHT] and BLUE_MOVES > 0:
+                x2, y2 = player2_pos
+                if event.key == pygame.K_UP and y2 > 0:
+                    y2 -= 1
+                    player2_angle = 270
+                elif event.key == pygame.K_DOWN and y2 < GRID_SIZE - 1:
+                    y2 += 1
+                    player2_angle = 90
+                elif event.key == pygame.K_LEFT and x2 > 0:
+                    x2 -= 1
+                    player2_angle = 180
+                elif event.key == pygame.K_RIGHT and x2 < GRID_SIZE - 1:
+                    x2 += 1
+                    player2_angle = 0
+                player2_pos = x2, y2
+                grid[y2][x2] = BLUE
+                BLUE_MOVES -= 1  # Decrement player 2 move counter
 
     # Drawing the board and assets
     for row in range(GRID_SIZE):
