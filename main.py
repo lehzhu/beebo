@@ -38,6 +38,14 @@ grid = [[WHITE for _ in range(GRID_SIZE)] for _ in range(GRID_SIZE)]
 player1_pos = [3, 3]  # Starting position
 player2_pos = [4, 4]  # Starting position
 
+def draw_grid():
+    # Draw vertical lines
+    for i in range(0, WIDTH, CELL_SIZE):
+        pygame.draw.line(screen, (200, 200, 200), (i, 0), (i, HEIGHT))
+    # Draw horizontal lines
+    for i in range(0, HEIGHT, CELL_SIZE):
+        pygame.draw.line(screen, (200, 200, 200), (0, i), (WIDTH, i))
+
 while True:
     screen.fill(WHITE)
 
@@ -106,5 +114,6 @@ while True:
     screen.blit(red_text, (10, HEIGHT + 10))
     screen.blit(blue_text, (WIDTH - 200, HEIGHT + 10))
 
+    draw_grid()
     pygame.display.flip()
     clock.tick(60)
