@@ -20,14 +20,12 @@ pygame.display.set_caption('Beebo Game')
 clock = pygame.time.Clock()
 
 # Load assets
-red_grape = pygame.image.load('assets/redcater.jpg')
-red_grape = pygame.transform.scale(red_grape, (CELL_SIZE, CELL_SIZE))
-green_grape = pygame.image.load('assets/bluecater.jpg')
-green_grape = pygame.transform.scale(green_grape, (CELL_SIZE, CELL_SIZE))
-
-# Initialize rotation angle
-player1_angle = 0
-player2_angle = 0
+playerRed_image = pygame.image.load('assets/redcater.jpg')
+playerRed = pygame.transform.scale(playerRed_image, (CELL_SIZE, CELL_SIZE))
+playerBlue_image = pygame.image.load('assets/bluecater.jpg')
+playerBlue = pygame.transform.scale(playerBlue_image, (CELL_SIZE, CELL_SIZE))
+playerRed_angle = 0
+playerBlue_angle = 0
 
 # Initialize move counter
 RED_MOVES = 50
@@ -97,8 +95,8 @@ while True:
             color = grid[row][col]
             pygame.draw.rect(screen, color, (col * CELL_SIZE, row * CELL_SIZE, CELL_SIZE, CELL_SIZE))
 
-    rotated_red_grape = pygame.transform.rotate(red_grape, player1_angle)
-    rotated_green_grape = pygame.transform.rotate(green_grape, player2_angle)
+    rotated_red_grape = pygame.transform.rotate(playerRed, playerRed_angle)
+    rotated_green_grape = pygame.transform.rotate(playerBlue, playerBlue_angle)
     screen.blit(rotated_red_grape, (player1_pos[0] * CELL_SIZE, player1_pos[1] * CELL_SIZE))
     screen.blit(rotated_green_grape, (player2_pos[0] * CELL_SIZE, player2_pos[1] * CELL_SIZE))
 
