@@ -8,8 +8,8 @@ SCREEN_HEIGHT = HEIGHT + INFO_PANEL_HEIGHT
 CELL_SIZE = 100
 GRID_SIZE = WIDTH // CELL_SIZE
 
-RED = (255, 0, 0)
-BLUE = (0, 0, 255)
+RED = (244, 67, 54)
+BLUE = (111, 168, 220)
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 
@@ -20,9 +20,9 @@ pygame.display.set_caption('Beebo Game')
 clock = pygame.time.Clock()
 
 # Load assets
-red_grape = pygame.image.load('assets/redgrape.jpeg')
+red_grape = pygame.image.load('assets/redcater.jpg')
 red_grape = pygame.transform.scale(red_grape, (CELL_SIZE, CELL_SIZE))
-green_grape = pygame.image.load('assets/greengrape.jpeg')
+green_grape = pygame.image.load('assets/bluecater.jpg')
 green_grape = pygame.transform.scale(green_grape, (CELL_SIZE, CELL_SIZE))
 
 # Initialize rotation angle
