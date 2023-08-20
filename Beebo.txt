@@ -1,0 +1,17 @@
+Beebo 
+
+Win conditions
+Occupy more territory when timer runs out 
+Occupy more territory when no moves are left 
+Be the last one standing 
+
+To-do
+
+-Actually have a move counter
+-Display the move counter 
+
+-Have a distinct head and direction 
+-Have distinct body 
+
+-Have a 2-step lockout system where one player can only be 2 moves ahead 
+
