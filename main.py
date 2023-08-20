@@ -2,38 +2,43 @@ import pygame
 import sys
 
 # Constants
-SCREEN_SIZE = 500
-GRID_SIZE = 8
-CELL_SIZE = SCREEN_SIZE // GRID_SIZE
+WIDTH, HEIGHT = 800, 800
+INFO_PANEL_HEIGHT = 100
+SCREEN_HEIGHT = HEIGHT + INFO_PANEL_HEIGHT
+CELL_SIZE = 100
+GRID_SIZE = WIDTH // CELL_SIZE
 
-# Colors
-WHITE = (255, 255, 255)
 RED = (255, 0, 0)
 BLUE = (0, 0, 255)
-GRAY = (200, 200, 200)
-NEUTRAL = (128, 128, 128)
+WHITE = (255, 255, 255)
+BLACK = (0, 0, 0)
 
-# Initialize pygame
+# Initialize screen and clock
 pygame.init()
-
-screen = pygame.display.set_mode((SCREEN_SIZE, SCREEN_SIZE))
-pygame.display.set_caption("Beebo Strategic Game")
-
+screen = pygame.display.set_mode((WIDTH, SCREEN_HEIGHT))
+pygame.display.set_caption('Beebo Game')
 clock = pygame.time.Clock()
 
-# Initialize game state
-grid = [[NEUTRAL for _ in range(GRID_SIZE)] for _ in range(GRID_SIZE)]
-player1_pos = (0, 0)
-player2_pos = (7, 7)
-grid[0][0] = RED
-grid[7][7] = BLUE
-current_player = RED
+# Load assets
+red_grape = pygame.image.load('assets/redgrape.jpeg')
+red_grape = pygame.transform.scale(red_grape, (CELL_SIZE, CELL_SIZE))
+green_grape = pygame.image.load('assets/greengrape.jpeg')
+green_grape = pygame.transform.scale(green_grape, (CELL_SIZE, CELL_SIZE))
 
-def draw_grid():
-    for x in range(0, SCREEN_SIZE, CELL_SIZE):
-        pygame.draw.line(screen, GRAY, (x, 0), (x, SCREEN_SIZE))
-    for y in range(0, SCREEN_SIZE, CELL_SIZE):
-        pygame.draw.line(screen, GRAY, (0, y), (SCREEN_SIZE, y))
+# Initialize rotation angle
+player1_angle = 0
+player2_angle = 0
+
+# Initialize move counter
+RED_MOVES = 50
+BLUE_MOVES = 50
+font = pygame.font.Font(None, 36)
+
+# Your grid initialization here
+grid = [[WHITE for _ in range(GRID_SIZE)] for _ in range(GRID_SIZE)]
+
+player1_pos = [3, 3]  # Starting position
+player2_pos = [4, 4]  # Starting position
 
 while True:
     screen.fill(WHITE)
@@ -46,34 +51,55 @@ while True:
             x1, y1 = player1_pos
             if event.key == pygame.K_w and y1 > 0:
                 y1 -= 1
+                player1_angle = 270
             elif event.key == pygame.K_s and y1 < GRID_SIZE - 1:
                 y1 += 1
+                player1_angle = 90
             elif event.key == pygame.K_a and x1 > 0:
                 x1 -= 1
+                player1_angle = 180
             elif event.key == pygame.K_d and x1 < GRID_SIZE - 1:
                 x1 += 1
+                player1_angle = 0
             player1_pos = x1, y1
             grid[y1][x1] = RED
+            if RED_MOVES > 0:
+                RED_MOVES -= 1
 
             x2, y2 = player2_pos
             if event.key == pygame.K_UP and y2 > 0:
                 y2 -= 1
+                player2_angle = 270
             elif event.key == pygame.K_DOWN and y2 < GRID_SIZE - 1:
                 y2 += 1
+                player2_angle = 90
             elif event.key == pygame.K_LEFT and x2 > 0:
                 x2 -= 1
+                player2_angle = 180
             elif event.key == pygame.K_RIGHT and x2 < GRID_SIZE - 1:
                 x2 += 1
+                player2_angle = 0
             player2_pos = x2, y2
             grid[y2][x2] = BLUE
+            if BLUE_MOVES > 0:
+                BLUE_MOVES -= 1
 
-
+    # Drawing the board and assets
     for row in range(GRID_SIZE):
         for col in range(GRID_SIZE):
             color = grid[row][col]
-            pygame.draw.rect(screen, color, (col*CELL_SIZE, row*CELL_SIZE, CELL_SIZE, CELL_SIZE))
+            pygame.draw.rect(screen, color, (col * CELL_SIZE, row * CELL_SIZE, CELL_SIZE, CELL_SIZE))
 
-    draw_grid()
+    rotated_red_grape = pygame.transform.rotate(red_grape, player1_angle)
+    rotated_green_grape = pygame.transform.rotate(green_grape, player2_angle)
+    screen.blit(rotated_red_grape, (player1_pos[0] * CELL_SIZE, player1_pos[1] * CELL_SIZE))
+    screen.blit(rotated_green_grape, (player2_pos[0] * CELL_SIZE, player2_pos[1] * CELL_SIZE))
+
+    # Draw move counter
+    red_text = font.render('Red Moves: ' + str(RED_MOVES), True, BLACK)
+    blue_text = font.render('Blue Moves: ' + str(BLUE_MOVES), True, BLACK)
+    screen.blit(red_text, (10, HEIGHT + 10))
+    screen.blit(blue_text, (WIDTH - 200, HEIGHT + 10))
 
     pygame.display.flip()
     clock.tick(60)
