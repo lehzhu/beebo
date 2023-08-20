@@ -56,16 +56,16 @@ while True:
                 x1, y1 = player1_pos
                 if event.key == pygame.K_w and y1 > 0:
                     y1 -= 1
-                    player1_angle = 270
+                    playerRed_angle = 0
                 elif event.key == pygame.K_s and y1 < GRID_SIZE - 1:
                     y1 += 1
-                    player1_angle = 90
+                    playerRed_angle = 180
                 elif event.key == pygame.K_a and x1 > 0:
                     x1 -= 1
-                    player1_angle = 180
+                    playerRed_angle = 90
                 elif event.key == pygame.K_d and x1 < GRID_SIZE - 1:
                     x1 += 1
-                    player1_angle = 0
+                    playerRed_angle = 270
                 player1_pos = x1, y1
                 grid[y1][x1] = RED
                 RED_MOVES -= 1  # Decrement player 1 move counter
@@ -75,16 +75,16 @@ while True:
                 x2, y2 = player2_pos
                 if event.key == pygame.K_UP and y2 > 0:
                     y2 -= 1
-                    player2_angle = 270
+                    playerBlue_angle = 0
                 elif event.key == pygame.K_DOWN and y2 < GRID_SIZE - 1:
                     y2 += 1
-                    player2_angle = 90
+                    playerBlue_angle = 180
                 elif event.key == pygame.K_LEFT and x2 > 0:
                     x2 -= 1
-                    player2_angle = 180
+                    playerBlue_angle = 90
                 elif event.key == pygame.K_RIGHT and x2 < GRID_SIZE - 1:
                     x2 += 1
-                    player2_angle = 0
+                    playerBlue_angle = 270
                 player2_pos = x2, y2
                 grid[y2][x2] = BLUE
                 BLUE_MOVES -= 1  # Decrement player 2 move counter
