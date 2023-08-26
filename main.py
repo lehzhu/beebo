@@ -46,6 +46,7 @@ def draw_grid():
     for i in range(0, HEIGHT, CELL_SIZE):
         pygame.draw.line(screen, (200, 200, 200), (0, i), (WIDTH, i))
 
+#game logic
 while True:
     screen.fill(WHITE)
 
@@ -77,6 +78,7 @@ while True:
                 player1_pos = x1, y1
                 grid[y1][x1] = RED
                 RED_MOVES -= 1  # Decrement player 1 move counter
+
 
             # Player 2 Movement
             if event.key in [pygame.K_UP, pygame.K_DOWN, pygame.K_LEFT, pygame.K_RIGHT] and BLUE_MOVES > 0:
