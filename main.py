@@ -117,6 +117,14 @@ def check_for_opponent_capture(player_color, opponent_color):
 def count_tiles(color):
     return sum(row.count(color) for row in grid)
 
+def draw_button(text, x, y, w, h, color):
+    button = pygame.Rect(x, y, w, h)
+    pygame.draw.rect(screen, color, button)
+    button_text = font.render(text, True, WHITE)
+    screen.blit(button_text, (x + w//4, y + h//4))
+    return button
+
+
 
 def draw_restart_button():
     button_color = (0, 128, 0)  # green
@@ -276,7 +284,31 @@ def main_game_loop():
 
         pygame.display.flip()
         clock.tick(60)
+    pass
 
+while True:
+    screen.fill(WHITE)
 
-if __name__ == "__main__":
-    main_game_loop()
+    start_button = draw_button("Start Game", 300, 150, 200, 50, RED)
+    one_player_button = draw_button("1-Player", 300, 250, 200, 50, RED)
+    two_player_button = draw_button("2-Player", 300, 350, 200, 50, RED)
+
+    how_to_play_text = font.render("How to Play:", True, BLACK)
+    screen.blit(how_to_play_text, (50, 450))
+    instructions_text = font.render("Place tiles to capture territory.", True, BLACK)
+    screen.blit(instructions_text, (50, 480))
+
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            pygame.quit()
+            sys.exit()
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            mouse_pos = pygame.mouse.get_pos()
+            if start_button.collidepoint(mouse_pos):
+                main_game_loop()
+            elif one_player_button.collidepoint(mouse_pos):
+                print("1-Player game selected.")
+            elif two_player_button.collidepoint(mouse_pos):
+                print("2-Player game selected.")
+
+    pygame.display.flip()
