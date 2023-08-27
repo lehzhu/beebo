@@ -8,7 +8,6 @@ INFO_PANEL_HEIGHT = 100
 SCREEN_HEIGHT = HEIGHT + INFO_PANEL_HEIGHT
 CELL_SIZE = 100
 GRID_SIZE = WIDTH // CELL_SIZE
-
 RED = (244, 67, 54)
 BLUE = (111, 168, 220)
 WHITE = (255, 255, 255)
@@ -28,17 +27,66 @@ playerBlue = pygame.transform.scale(playerBlue_image, (CELL_SIZE, CELL_SIZE))
 playerRed_angle = 0
 playerBlue_angle = 0
 
-# Move counters and penalties
+# Move counters, penalties, trackers
 RED_MOVES = 50
 BLUE_MOVES = 50
 font = pygame.font.Font(None, 36)
-MOVE_PENALTY = 2
+MOVE_PENALTY = 2 #MOVE PENALTY
+checked_for_red_capture = set()
+checked_for_blue_capture = set()
 
 # Your grid initialization here
 grid = [[WHITE for _ in range(GRID_SIZE)] for _ in range(GRID_SIZE)]
-
 player1_pos = [3, 3]  # Starting position
 player2_pos = [4, 4]  # Starting position
+
+def flood_fill(x, y, grid, marked):
+    directions = [(0, 1), (1, 0), (0, -1), (-1, 0)]
+    stack = [(x, y)]
+
+    while stack:
+        cx, cy = stack.pop()
+        if (cx, cy) in marked:
+            continue
+
+        marked.add((cx, cy))
+
+        for dx, dy in directions:
+            nx, ny = cx + dx, cy + dy
+
+            if 0 <= nx < GRID_SIZE and 0 <= ny < GRID_SIZE:
+                if grid[ny][nx] == WHITE and (nx, ny) not in marked:
+                    stack.append((nx, ny))
+
+def check_capture(x, y, color, checked_set):
+    directions = [(0, 1), (1, 0), (0, -1), (-1, 0)]
+    stack = [(x, y)]
+    visited = set()
+    is_capture = True
+
+    while stack:
+        cx, cy = stack.pop()
+        visited.add((cx, cy))
+
+        for dx, dy in directions:
+            nx, ny = cx + dx, cy + dy
+
+            if nx < 0 or nx >= GRID_SIZE or ny < 0 or ny >= GRID_SIZE:
+                is_capture = False
+                continue
+
+            next_tile = grid[ny][nx]
+
+            if next_tile == WHITE and (nx, ny) not in visited:
+                stack.append((nx, ny))
+            elif next_tile != color:
+                is_capture = False
+
+    if is_capture:
+        for cx, cy in visited:
+            grid[cy][cx] = color
+    checked_set.update(visited)
+    return len(visited) if is_capture else 0
 
 
 def draw_grid():
@@ -65,7 +113,7 @@ while True:
             sys.exit()
         # Event logic after key press
         elif event.type == pygame.KEYDOWN:
-            #Positions upon next move
+            # Positions upon next move
             next_x1, next_y1 = player1_pos
             next_x2, next_y2 = player2_pos
 
@@ -86,7 +134,7 @@ while True:
                         RED_MOVES -= MOVE_PENALTY  # Apply penalty
                     else:
                         RED_MOVES -= 1  # Decrement move counter
-                    #If no penalty, move as usual
+                    # If no penalty, move as usual
                     player1_pos = next_x1, next_y1
                     grid[next_y1][next_x1] = RED
 
@@ -107,9 +155,28 @@ while True:
                         BLUE_MOVES -= MOVE_PENALTY  # Apply penalty
                     else:
                         BLUE_MOVES -= 1  # Decrement move counter if no penalty
-                    #Move as usual
+                    # Move as usual
                     player2_pos = next_x2, next_y2
                     grid[next_y2][next_x2] = BLUE
+
+    # Reset checked_for_capture sets
+    checked_for_red_capture.clear()
+    checked_for_blue_capture.clear()
+    # Check for captures and add moves to move counters
+    captured_tiles_red = 0  # Initialize counters for red's captured tiles
+    captured_tiles_blue = 0  # Initialize counters for blue's captured tiles
+    for row in range(GRID_SIZE):
+        for col in range(GRID_SIZE):
+            color = grid[row][col]
+            if color == WHITE:
+                if (row, col) not in checked_for_red_capture:
+                    captured_tiles_red += check_capture(row, col, RED, checked_for_red_capture)
+                if (row, col) not in checked_for_blue_capture:
+                    captured_tiles_blue += check_capture(row, col, BLUE, checked_for_blue_capture)
+
+    # Add moves back to the move counter
+    RED_MOVES += captured_tiles_red // 2
+    BLUE_MOVES += captured_tiles_blue // 2
 
     # Drawing the board and assets
     for row in range(GRID_SIZE):
