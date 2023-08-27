@@ -41,55 +41,58 @@ player1_pos = [3, 3]  # Starting position
 player2_pos = [4, 4]  # Starting position
 
 
-def flood_fill(x, y, grid, marked):
-    directions = [(0, 1), (1, 0), (0, -1), (-1, 0)]
+def flood_fill(x, y, grid, marked, exclude_colors):
     stack = [(x, y)]
-
     while stack:
         cx, cy = stack.pop()
-        if (cx, cy) in marked:
+        if (cx, cy) in marked or grid[cy][cx] in exclude_colors:
             continue
 
         marked.add((cx, cy))
 
-        for dx, dy in directions:
+        for dx, dy in [(0, 1), (1, 0), (0, -1), (-1, 0)]:
             nx, ny = cx + dx, cy + dy
-
             if 0 <= nx < GRID_SIZE and 0 <= ny < GRID_SIZE:
-                if grid[ny][nx] == WHITE and (nx, ny) not in marked:
-                    stack.append((nx, ny))
-
+                stack.append((nx, ny))
 
 def check_for_capture():
     global RED_MOVES, BLUE_MOVES
-    for x in range(GRID_SIZE):
-        for y in range(GRID_SIZE):
-            if grid[y][x] == WHITE:
-                marked = set()
-                flood_fill(x, y, grid, marked)
 
-                touches_edge = any(x == 0 or x == GRID_SIZE - 1 or y == 0 or y == GRID_SIZE - 1 for x, y in marked)
-                if not touches_edge:
-                    color = None
+    for y in range(GRID_SIZE):
+        for x in range(GRID_SIZE):
+            if grid[y][x] != WHITE:
+                continue
+
+            marked = set()
+            flood_fill(x, y, grid, marked, {RED, BLUE})
+
+            touches_edge = any(
+                x == 0 or x == GRID_SIZE - 1 or y == 0 or y == GRID_SIZE - 1 for x, y in marked
+            )
+
+            if not touches_edge:
+                neighbor_colors = set()
+
+                for cx, cy in marked:
                     for dx, dy in [(0, 1), (1, 0), (0, -1), (-1, 0)]:
-                        nx, ny = x + dx, y + dy
+                        nx, ny = cx + dx, cy + dy
                         if 0 <= nx < GRID_SIZE and 0 <= ny < GRID_SIZE:
                             neighbor_color = grid[ny][nx]
                             if neighbor_color in [RED, BLUE]:
-                                if color is None:
-                                    color = neighbor_color
-                                elif color != neighbor_color:
-                                    color = None
-                                    break
+                                neighbor_colors.add(neighbor_color)
 
-                    if color is not None:
-                        for cx, cy in marked:
-                            grid[cy][cx] = color
+                if len(neighbor_colors) == 1:
+                    capture_color = neighbor_colors.pop()
 
-                        if color == RED:
-                            RED_MOVES += len(marked) // 2
-                        else:
-                            BLUE_MOVES += len(marked) // 2
+                    for cx, cy in marked:
+                        grid[cy][cx] = capture_color
+
+                    if capture_color == RED:
+                        RED_MOVES += len(marked)
+                    else:
+                        BLUE_MOVES += len(marked)
+
+
 
 
 def draw_grid():
