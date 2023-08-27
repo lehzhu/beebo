@@ -7,11 +7,11 @@ Be the last one standing
 
 To-do
 
--Actually have a move counter
--Display the move counter 
+-Have distinct body
+-Capture mechanics
+-Move counter reward after capture
+-Food
+-Obstacles? walls?
 
--Have a distinct head and direction 
--Have distinct body 
-
--Have a 2-step lockout system where one player can only be 2 moves ahead 
+-Timer
 

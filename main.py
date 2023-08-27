@@ -1,5 +1,6 @@
 import pygame
 import sys
+from collections import deque
 
 # Constants
 WIDTH, HEIGHT = 800, 800
@@ -27,16 +28,18 @@ playerBlue = pygame.transform.scale(playerBlue_image, (CELL_SIZE, CELL_SIZE))
 playerRed_angle = 0
 playerBlue_angle = 0
 
-# Initialize move counter
+# Move counters and penalties
 RED_MOVES = 50
 BLUE_MOVES = 50
 font = pygame.font.Font(None, 36)
+MOVE_PENALTY = 2
 
 # Your grid initialization here
 grid = [[WHITE for _ in range(GRID_SIZE)] for _ in range(GRID_SIZE)]
 
 player1_pos = [3, 3]  # Starting position
 player2_pos = [4, 4]  # Starting position
+
 
 def draw_grid():
     # Draw vertical lines
@@ -46,7 +49,8 @@ def draw_grid():
     for i in range(0, HEIGHT, CELL_SIZE):
         pygame.draw.line(screen, (200, 200, 200), (0, i), (WIDTH, i))
 
-#game logic
+
+# game logic
 while True:
     screen.fill(WHITE)
 
@@ -59,45 +63,53 @@ while True:
         if event.type == pygame.QUIT:
             pygame.quit()
             sys.exit()
+        # Event logic after key press
         elif event.type == pygame.KEYDOWN:
-            # Player 1 Movement
+            #Positions upon next move
+            next_x1, next_y1 = player1_pos
+            next_x2, next_y2 = player2_pos
+
+            # Player Red Movement
             if event.key in [pygame.K_w, pygame.K_s, pygame.K_a, pygame.K_d] and RED_MOVES > 0:
-                x1, y1 = player1_pos
-                if event.key == pygame.K_w and y1 > 0:
-                    y1 -= 1
-                    playerRed_angle = 0
-                elif event.key == pygame.K_s and y1 < GRID_SIZE - 1:
-                    y1 += 1
-                    playerRed_angle = 180
-                elif event.key == pygame.K_a and x1 > 0:
-                    x1 -= 1
-                    playerRed_angle = 90
-                elif event.key == pygame.K_d and x1 < GRID_SIZE - 1:
-                    x1 += 1
-                    playerRed_angle = 270
-                player1_pos = x1, y1
-                grid[y1][x1] = RED
-                RED_MOVES -= 1  # Decrement player 1 move counter
+                if event.key == pygame.K_w:
+                    next_y1 -= 1
+                elif event.key == pygame.K_s:
+                    next_y1 += 1
+                elif event.key == pygame.K_a:
+                    next_x1 -= 1
+                elif event.key == pygame.K_d:
+                    next_x1 += 1
 
+                # Collision Check
+                if 0 <= next_x1 < GRID_SIZE and 0 <= next_y1 < GRID_SIZE:
+                    if grid[next_y1][next_x1] == BLUE:
+                        RED_MOVES -= MOVE_PENALTY  # Apply penalty
+                    else:
+                        RED_MOVES -= 1  # Decrement move counter
+                    #If no penalty, move as usual
+                    player1_pos = next_x1, next_y1
+                    grid[next_y1][next_x1] = RED
 
-            # Player 2 Movement
+            # Player Blue Movement
             if event.key in [pygame.K_UP, pygame.K_DOWN, pygame.K_LEFT, pygame.K_RIGHT] and BLUE_MOVES > 0:
-                x2, y2 = player2_pos
-                if event.key == pygame.K_UP and y2 > 0:
-                    y2 -= 1
-                    playerBlue_angle = 0
-                elif event.key == pygame.K_DOWN and y2 < GRID_SIZE - 1:
-                    y2 += 1
-                    playerBlue_angle = 180
-                elif event.key == pygame.K_LEFT and x2 > 0:
-                    x2 -= 1
-                    playerBlue_angle = 90
-                elif event.key == pygame.K_RIGHT and x2 < GRID_SIZE - 1:
-                    x2 += 1
-                    playerBlue_angle = 270
-                player2_pos = x2, y2
-                grid[y2][x2] = BLUE
-                BLUE_MOVES -= 1  # Decrement player 2 move counter
+                if event.key == pygame.K_UP:
+                    next_y2 -= 1
+                elif event.key == pygame.K_DOWN:
+                    next_y2 += 1
+                elif event.key == pygame.K_LEFT:
+                    next_x2 -= 1
+                elif event.key == pygame.K_RIGHT:
+                    next_x2 += 1
+
+                # Collision Check
+                if 0 <= next_x2 < GRID_SIZE and 0 <= next_y2 < GRID_SIZE:
+                    if grid[next_y2][next_x2] == RED:
+                        BLUE_MOVES -= MOVE_PENALTY  # Apply penalty
+                    else:
+                        BLUE_MOVES -= 1  # Decrement move counter if no penalty
+                    #Move as usual
+                    player2_pos = next_x2, next_y2
+                    grid[next_y2][next_x2] = BLUE
 
     # Drawing the board and assets
     for row in range(GRID_SIZE):
