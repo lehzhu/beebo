@@ -119,10 +119,9 @@ def count_tiles(color):
 
 
 def draw_restart_button():
-    button_color = (0, 128, 0)
+    button_color = (0, 128, 0)  # green
     button_rect = pygame.Rect(WIDTH // 2 - 50, HEIGHT // 2 + 50, 100, 40)
     pygame.draw.rect(screen, button_color, button_rect)
-
     button_text = font.render("Restart", True, WHITE)
     screen.blit(button_text, (button_rect.x + 15, button_rect.y + 10))
 
@@ -221,8 +220,9 @@ def main_game_loop():
             check_for_opponent_capture(BLUE, RED)
             last_player2_pos = player2_pos  # Update last known position
 
-        # End screen
+                # End screen
         if RED_MOVES <= 0 and BLUE_MOVES <= 0:  # All moves are depleted
+            print("Entered end screen")  # Debug print
             red_score = count_tiles(RED)
             blue_score = count_tiles(BLUE)
 
@@ -242,19 +242,26 @@ def main_game_loop():
 
             pygame.display.flip()
             waiting_for_restart = True
+            print("Button Rect:", button_rect)  # Debug print
             while waiting_for_restart:
+                print("Waiting for restart click")  # Debug print
                 for event in pygame.event.get():
                     if event.type == pygame.QUIT:
                         pygame.quit()
                         sys.exit()
                     if event.type == pygame.MOUSEBUTTONDOWN:
+                        print("Mouse button down detected!")  # Debug print
                         mouse_pos = pygame.mouse.get_pos()
                         if button_rect.collidepoint(mouse_pos):
+                            print("Button clicked!")  # Debug print
                             waiting_for_restart = False
-                            # Initialize game state here for restarting
-                            # For example, reset all your global variables
 
-                            main_game_loop()  # Start a new game by calling your main loop function
+            print("Restarting game...")  # Debug print
+            # Initialize game state here for restarting
+            # For example, reset all your global variables
+
+            main_game_loop()  # Start a new game by calling your main loop function
+
 
         draw_board()
         # Draw grid lines
