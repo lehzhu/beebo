@@ -295,8 +295,19 @@ while True:
 
     how_to_play_text = font.render("How to Play:", True, BLACK)
     screen.blit(how_to_play_text, (50, 450))
-    instructions_text = font.render("Place tiles to capture territory.", True, BLACK)
-    screen.blit(instructions_text, (50, 480))
+    text_lines = [
+        "RED: Use WASD",
+        "BLUE: Use Arrow Keys",
+        "The objective is to control more squares.",
+        "Capturing squares by surrounding them."
+    ]
+    y = 480
+    for line in text_lines:
+        text_surface = font.render(line, True, BLACK)
+        screen.blit(text_surface, (50, y))
+        y += 30
+
+
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
