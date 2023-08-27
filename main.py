@@ -31,7 +31,7 @@ playerBlue_angle = 0
 RED_MOVES = 50
 BLUE_MOVES = 50
 font = pygame.font.Font(None, 36)
-MOVE_PENALTY = 2 #MOVE PENALTY
+MOVE_PENALTY = 2  # MOVE PENALTY
 checked_for_red_capture = set()
 checked_for_blue_capture = set()
 
@@ -39,6 +39,7 @@ checked_for_blue_capture = set()
 grid = [[WHITE for _ in range(GRID_SIZE)] for _ in range(GRID_SIZE)]
 player1_pos = [3, 3]  # Starting position
 player2_pos = [4, 4]  # Starting position
+
 
 def flood_fill(x, y, grid, marked):
     directions = [(0, 1), (1, 0), (0, -1), (-1, 0)]
@@ -58,35 +59,37 @@ def flood_fill(x, y, grid, marked):
                 if grid[ny][nx] == WHITE and (nx, ny) not in marked:
                     stack.append((nx, ny))
 
-def check_capture(x, y, color, checked_set):
-    directions = [(0, 1), (1, 0), (0, -1), (-1, 0)]
-    stack = [(x, y)]
-    visited = set()
-    is_capture = True
 
-    while stack:
-        cx, cy = stack.pop()
-        visited.add((cx, cy))
+def check_for_capture():
+    global RED_MOVES, BLUE_MOVES
+    for x in range(GRID_SIZE):
+        for y in range(GRID_SIZE):
+            if grid[y][x] == WHITE:
+                marked = set()
+                flood_fill(x, y, grid, marked)
 
-        for dx, dy in directions:
-            nx, ny = cx + dx, cy + dy
+                touches_edge = any(x == 0 or x == GRID_SIZE - 1 or y == 0 or y == GRID_SIZE - 1 for x, y in marked)
+                if not touches_edge:
+                    color = None
+                    for dx, dy in [(0, 1), (1, 0), (0, -1), (-1, 0)]:
+                        nx, ny = x + dx, y + dy
+                        if 0 <= nx < GRID_SIZE and 0 <= ny < GRID_SIZE:
+                            neighbor_color = grid[ny][nx]
+                            if neighbor_color in [RED, BLUE]:
+                                if color is None:
+                                    color = neighbor_color
+                                elif color != neighbor_color:
+                                    color = None
+                                    break
 
-            if nx < 0 or nx >= GRID_SIZE or ny < 0 or ny >= GRID_SIZE:
-                is_capture = False
-                continue
+                    if color is not None:
+                        for cx, cy in marked:
+                            grid[cy][cx] = color
 
-            next_tile = grid[ny][nx]
-
-            if next_tile == WHITE and (nx, ny) not in visited:
-                stack.append((nx, ny))
-            elif next_tile != color:
-                is_capture = False
-
-    if is_capture:
-        for cx, cy in visited:
-            grid[cy][cx] = color
-    checked_set.update(visited)
-    return len(visited) if is_capture else 0
+                        if color == RED:
+                            RED_MOVES += len(marked) // 2
+                        else:
+                            BLUE_MOVES += len(marked) // 2
 
 
 def draw_grid():
@@ -96,6 +99,18 @@ def draw_grid():
     # Draw horizontal lines
     for i in range(0, HEIGHT, CELL_SIZE):
         pygame.draw.line(screen, (200, 200, 200), (0, i), (WIDTH, i))
+
+
+def draw_board():
+    for row in range(GRID_SIZE):
+        for col in range(GRID_SIZE):
+            color = grid[row][col]
+            pygame.draw.rect(screen, color, (col * CELL_SIZE, row * CELL_SIZE, CELL_SIZE, CELL_SIZE))
+
+    rotated_red = pygame.transform.rotate(playerRed, playerRed_angle)
+    rotated_blue = pygame.transform.rotate(playerBlue, playerBlue_angle)
+    screen.blit(rotated_red, (player1_pos[0] * CELL_SIZE, player1_pos[1] * CELL_SIZE))
+    screen.blit(rotated_blue, (player2_pos[0] * CELL_SIZE, player2_pos[1] * CELL_SIZE))
 
 
 # game logic
@@ -160,34 +175,9 @@ while True:
                     grid[next_y2][next_x2] = BLUE
 
     # Reset checked_for_capture sets
-    checked_for_red_capture.clear()
-    checked_for_blue_capture.clear()
-    # Check for captures and add moves to move counters
-    captured_tiles_red = 0  # Initialize counters for red's captured tiles
-    captured_tiles_blue = 0  # Initialize counters for blue's captured tiles
-    for row in range(GRID_SIZE):
-        for col in range(GRID_SIZE):
-            color = grid[row][col]
-            if color == WHITE:
-                if (row, col) not in checked_for_red_capture:
-                    captured_tiles_red += check_capture(row, col, RED, checked_for_red_capture)
-                if (row, col) not in checked_for_blue_capture:
-                    captured_tiles_blue += check_capture(row, col, BLUE, checked_for_blue_capture)
+    check_for_capture()
 
-    # Add moves back to the move counter
-    RED_MOVES += captured_tiles_red // 2
-    BLUE_MOVES += captured_tiles_blue // 2
-
-    # Drawing the board and assets
-    for row in range(GRID_SIZE):
-        for col in range(GRID_SIZE):
-            color = grid[row][col]
-            pygame.draw.rect(screen, color, (col * CELL_SIZE, row * CELL_SIZE, CELL_SIZE, CELL_SIZE))
-
-    rotated_red_grape = pygame.transform.rotate(playerRed, playerRed_angle)
-    rotated_green_grape = pygame.transform.rotate(playerBlue, playerBlue_angle)
-    screen.blit(rotated_red_grape, (player1_pos[0] * CELL_SIZE, player1_pos[1] * CELL_SIZE))
-    screen.blit(rotated_green_grape, (player2_pos[0] * CELL_SIZE, player2_pos[1] * CELL_SIZE))
+    draw_board()
 
     # Draw move counter
     red_text = font.render('Red Moves: ' + str(RED_MOVES), True, BLACK)
@@ -195,6 +185,5 @@ while True:
     screen.blit(red_text, (10, HEIGHT + 10))
     screen.blit(blue_text, (WIDTH - 200, HEIGHT + 10))
 
-    draw_grid()
     pygame.display.flip()
     clock.tick(60)
