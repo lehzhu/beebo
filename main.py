@@ -101,6 +101,9 @@ def draw_grid():
         pygame.draw.line(screen, (200, 200, 200), (0, i), (WIDTH, i))
 
 
+
+
+
 def draw_board():
     for row in range(GRID_SIZE):
         for col in range(GRID_SIZE):
@@ -117,10 +120,6 @@ def draw_board():
 while True:
     screen.fill(WHITE)
 
-    # Draw grid lines
-    for i in range(GRID_SIZE + 1):
-        pygame.draw.line(screen, BLACK, (i * CELL_SIZE, 0), (i * CELL_SIZE, HEIGHT))  # Vertical lines
-        pygame.draw.line(screen, BLACK, (0, i * CELL_SIZE), (WIDTH, i * CELL_SIZE))  # Horizontal lines
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -178,7 +177,10 @@ while True:
     check_for_capture()
 
     draw_board()
-
+    # Draw grid lines
+    for i in range(GRID_SIZE + 1):
+        pygame.draw.line(screen, BLACK, (i * CELL_SIZE, 0), (i * CELL_SIZE, HEIGHT))  # Vertical lines
+        pygame.draw.line(screen, BLACK, (0, i * CELL_SIZE), (WIDTH, i * CELL_SIZE))  # Horizontal lines
     # Draw move counter
     red_text = font.render('Red Moves: ' + str(RED_MOVES), True, BLACK)
     blue_text = font.render('Blue Moves: ' + str(BLUE_MOVES), True, BLACK)
