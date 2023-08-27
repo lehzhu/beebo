@@ -55,44 +55,63 @@ def flood_fill(x, y, grid, marked, exclude_colors):
             if 0 <= nx < GRID_SIZE and 0 <= ny < GRID_SIZE:
                 stack.append((nx, ny))
 
-def check_for_capture():
+def check_for_capture(player_color):
     global RED_MOVES, BLUE_MOVES
 
     for y in range(GRID_SIZE):
         for x in range(GRID_SIZE):
-            if grid[y][x] != WHITE:
+            if grid[y][x] == WHITE:
+                marked = set()
+                flood_fill(x, y, grid, marked, [player_color])
+
+                touches_edge = any(x == 0 or x == GRID_SIZE - 1 or y == 0 or y == GRID_SIZE - 1 for x, y in marked)
+                if not touches_edge:
+                    color = None
+                    for dx, dy in [(0, 1), (1, 0), (0, -1), (-1, 0)]:
+                        nx, ny = x + dx, y + dy
+                        if 0 <= nx < GRID_SIZE and 0 <= ny < GRID_SIZE:
+                            neighbor_color = grid[ny][nx]
+                            if neighbor_color in [RED, BLUE]:
+                                if color is None:
+                                    color = neighbor_color
+                                elif color != neighbor_color:
+                                    color = None
+                                    break
+
+                    if color is not None and color == player_color:
+                        for cx, cy in marked:
+                            grid[cy][cx] = color
+
+                        if color == RED:
+                            RED_MOVES += len(marked) // 1
+                        else:
+                            BLUE_MOVES += len(marked) // 1
+
+
+
+def check_for_opponent_capture(player_color, opponent_color):
+    global RED_MOVES, BLUE_MOVES
+    for y in range(GRID_SIZE):
+        for x in range(GRID_SIZE):
+            if grid[y][x] != opponent_color:
                 continue
 
             marked = set()
-            flood_fill(x, y, grid, marked, {RED, BLUE})
+            flood_fill(x, y, grid, marked, {player_color, WHITE})
 
             touches_edge = any(
                 x == 0 or x == GRID_SIZE - 1 or y == 0 or y == GRID_SIZE - 1 for x, y in marked
             )
 
             if not touches_edge:
-                neighbor_colors = set()
-
+                # At this point, we know that opponent squares are completely enclosed
                 for cx, cy in marked:
-                    for dx, dy in [(0, 1), (1, 0), (0, -1), (-1, 0)]:
-                        nx, ny = cx + dx, cy + dy
-                        if 0 <= nx < GRID_SIZE and 0 <= ny < GRID_SIZE:
-                            neighbor_color = grid[ny][nx]
-                            if neighbor_color in [RED, BLUE]:
-                                neighbor_colors.add(neighbor_color)
+                    grid[cy][cx] = player_color
 
-                if len(neighbor_colors) == 1:
-                    capture_color = neighbor_colors.pop()
-
-                    for cx, cy in marked:
-                        grid[cy][cx] = capture_color
-
-                    if capture_color == RED:
-                        RED_MOVES += len(marked)
-                    else:
-                        BLUE_MOVES += len(marked)
-
-
+                if player_color == RED:
+                    RED_MOVES += len(marked)
+                else:
+                    BLUE_MOVES += len(marked)
 
 
 def draw_grid():
@@ -102,10 +121,6 @@ def draw_grid():
     # Draw horizontal lines
     for i in range(0, HEIGHT, CELL_SIZE):
         pygame.draw.line(screen, (200, 200, 200), (0, i), (WIDTH, i))
-
-
-
-
 
 def draw_board():
     for row in range(GRID_SIZE):
@@ -119,6 +134,8 @@ def draw_board():
     screen.blit(rotated_blue, (player2_pos[0] * CELL_SIZE, player2_pos[1] * CELL_SIZE))
 
 
+last_player1_pos = None
+last_player2_pos = None
 # game logic
 while True:
     screen.fill(WHITE)
@@ -152,8 +169,9 @@ while True:
                     else:
                         RED_MOVES -= 1  # Decrement move counter
                     # If no penalty, move as usual
-                    player1_pos = next_x1, next_y1
                     grid[next_y1][next_x1] = RED
+                    player1_pos = next_x1, next_y1
+
 
             # Player Blue Movement
             if event.key in [pygame.K_UP, pygame.K_DOWN, pygame.K_LEFT, pygame.K_RIGHT] and BLUE_MOVES > 0:
@@ -173,11 +191,20 @@ while True:
                     else:
                         BLUE_MOVES -= 1  # Decrement move counter if no penalty
                     # Move as usual
-                    player2_pos = next_x2, next_y2
                     grid[next_y2][next_x2] = BLUE
+                    player2_pos = next_x2, next_y2
+    #Capture code
+    if player1_pos != last_player1_pos:  # if RED moved
+        check_for_capture(RED)
+        check_for_opponent_capture(RED, BLUE)
+        last_player1_pos = player1_pos  # Update last known position
 
-    # Reset checked_for_capture sets
-    check_for_capture()
+    if player2_pos != last_player2_pos:  # if BLUE moved
+        check_for_capture(BLUE)
+        check_for_opponent_capture(BLUE, RED)
+        last_player2_pos = player2_pos  # Update last known position
+
+
 
     draw_board()
     # Draw grid lines
